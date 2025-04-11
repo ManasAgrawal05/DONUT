@@ -3,49 +3,46 @@
 // //channel 3 is throttle
 // //channel 4 
 
-// #define CH1 33
-// #define CH2 35
-// #define CH3 32
 
-// #include <Comms.h>
+#include "Comms.h"
 
 
-// int x_dir = 0;
-// int y_dir = 0;
-// int throttle = 0;
+int x_dir = 0;
+int y_dir = 0;
+int throttle = 0;
 
-// void configComms() {
-//   pinMode(CH1, INPUT);
-//   pinMode(CH2, INPUT);
-//   pinMode(CH3, INPUT);
-// }
+void configComms() {
+  pinMode(CH1, INPUT);
+  pinMode(CH2, INPUT);
+  pinMode(CH3, INPUT);
+}
 
-// int readChannel(int channelInput, int minLimit, int maxLimit, int defaultValue) {
-//   int ch = pulseIn(channelInput, HIGH, 30000);
-//   if (ch < 100) return defaultValue;
-//   return map(ch, 1000, 2000, minLimit, maxLimit);
-// }
+int readChannel(int channelInput, int minLimit, int maxLimit, int defaultValue) {
+  int ch = pulseIn(channelInput, HIGH, 30000);
+  if (ch < 100) return defaultValue;
+  return map(ch, 1000, 2000, minLimit, maxLimit);
+}
 
 
-// void loopComms() {
-//   thumbX = readChannel(CH1, -100, 100, 0);
-//   thumbY = readChannel(CH2, -100, 100, 0);
-//   throt = readChannel(CH3, -100, 100, -100);
+void loopComms() {
+  thumbX = readChannel(CH1, -100, 100, 0);
+  thumbY = readChannel(CH2, -100, 100, 0);
+  throt = readChannel(CH3, -100, 100, -100);
 
-//   meltyThrottle = sqrt(thumbX*thumbX + thumbY*thumbY)/2;
-//   int16_t calcAngle = (int16_t) (atan2((double) thumbY, (double) thumbX*(flip*2-1))*180.0/PI);
-//   if(calcAngle < 0) calcAngle += 360;
-//   meltyAngle = (uint16_t) calcAngle;
+  meltyThrottle = sqrt(thumbX*thumbX + thumbY*thumbY)/2;
+  int16_t calcAngle = (int16_t) (atan2((double) thumbY, (double) thumbX*(flip*2-1))*180.0/PI);
+  if(calcAngle < 0) calcAngle += 360;
+  meltyAngle = (uint16_t) calcAngle;
   
-//   /*
-//    * transmitter failsafe is setting all values to 0, so as long as we
-//    * have a nonzero response, we know we're transmitting.
-//    */
-//   if (thumbX != 0 || thumbY != 0 || throt != 0) {
-//     lastReceived = micros();
-//   }
+  /*
+   * transmitter failsafe is setting all values to 0, so as long as we
+   * have a nonzero response, we know we're transmitting.
+   */
+  if (thumbX != 0 || thumbY != 0 || throt != 0) {
+    lastReceived = micros();
+  }
 
-// }
+}
 
 // void receivePacket() {
 //   //TODO: how do we know we're flipped? are we just gonna have inverted controls?

@@ -1,23 +1,15 @@
-// #include <Arduino.h>
-// #include <Adafruit_DotStar.h>
-// #include <SPI.h>
-// #include <i2c_t3.h>
-// // #include "src"
-// //#include <Wire.h>
+#include <donut.h>
+
+
 
 // #define enablePin 22 //Manas: my understanding is HIGH = off, Low = on
 // #define PIN_IR 15
 
 
-// unsigned long lastReceived = 0;
 
-// //controls
-// byte flip = 0;
-// int16_t thumbX = 0;
-// int16_t thumbY = 0;
-// uint16_t throt = 0;
-// uint16_t head = 0;
-// byte en = 0; //stands for enable, I think AA means on, 0 means off
+
+// //controls controlled by comms
+
 // //leds
 // //TODO: idk what Adafruit_DotStar is or what the params are.
 // Adafruit_DotStar strip = Adafruit_DotStar(5, DOTSTAR_GBR);
@@ -26,42 +18,32 @@
 // // MELTYBRAIN VARIABLES //
 // //**********************//
 
-// int16_t angle = 0;//LSB is one degree. Our current heading
 
-// int16_t meltyAngle = 0;//the commanded bearing angle for meltybrain control
-// uint16_t meltyThrottle = 0;
 
 // uint8_t senseMode = ACCEL_SENSING;
 
 // static unsigned const int HIGHEST_RPM = 0;
 
-// //ACCELEROMETER
-// void configAccelerometer(void);
-
 // //states
-// uint8_t state = 1;
-
-// #define STATE_IDLE 1
-// #define STATE_SPIN 2
-
-// void runMeltyBrain(void);
 
 
 
 
-// void goIdle() {
-//   state = STATE_IDLE;
+
+
+void goIdle() {
+  state = STATE_IDLE;
 //   digitalWrite(enablePin, HIGH);
-//   setMotorSpeed(motor1, 0);
-//   setMotorSpeed(motor2, 0);
+  setMotorSpeed(3, 0);
+  setMotorSpeed(4, 0);
   
-// }
+}
 
 
-// void goSpin() {
-//   state = STATE_SPIN;
+void goSpin() {
+  state = STATE_SPIN;
 //   digitalWrite(enablePin, LOW);
-// }
+}
 
 // void feedWatchdog() {
 //   noInterrupts();
@@ -75,8 +57,8 @@
 //   digitalWrite(enablePin, HIGH);
 // }
 
-// void setup() {
-//   Serial.begin(57600);
+void setup() {
+  Serial.begin(115200);
 //   // SPI.begin();
 //   // pinMode(enablePin, OUTPUT);
 //   // digitalWrite(enablePin, HIGH);
@@ -84,7 +66,7 @@
 
 //   // pinMode(PIN_IR, INPUT);
 
-//   // Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, 1800000, I2C_OP_MODE_IMM);//1.8MHz clock rate
+  Wire.begin();
 
 
 //   // //TODO: wtf is watchdog? From by understand 
@@ -107,21 +89,21 @@
 
 //   // analogWriteFrequency(3, 250);//this changes the frequency of both motor outputs
 
-//   configAccelerometer();
+  configAccelerometer();
 
 
 //   // configComms();
 
 //   // goIdle();
-// }
+}
 
-// void loop() {
+void loop() {
 
 //   // //Bark bark
 //   // feedWatchdog();
 
-//   // //check for incoming messages
-//   // loopComms();
+  //check for incoming messages
+  loopComms();
 
 //   // //make sure comms haven't timed out
 //   // if(micros() - lastReceived > 1000*1000 && state != STATE_IDLE) {
@@ -129,21 +111,20 @@
 //   //   goIdle();
 //   // }
 
-//   runAccelerometer();
 
-//   // switch(state) {
-//   //   case STATE_IDLE:
-//   //     break;
-//   //   case STATE_SPIN:
-//   //     runMeltyBrain();//manage all of the sensors and predict our current heading
+  switch(state) {
+    case STATE_IDLE:
+      break;
+    case STATE_SPIN:
+      runMeltyBrain();//manage all of the sensors and predict our current heading
 
-//   //     if(en != 0xAA) {
-//   //       goIdle();
-//   //     }
-//   //   default:
-//   //     break;
-//   // }
-// }
+    //   if(en != 0xAA) {
+    //     goIdle();
+    //   }
+    default:
+      break;
+  }
+}
 
 
 

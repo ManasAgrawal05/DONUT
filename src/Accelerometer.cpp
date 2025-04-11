@@ -1,4 +1,8 @@
-#include <Accelerometer.h>
+#include "Accelerometer.h"
+
+int16_t xAccel = 0;
+int16_t yAccel = 0;
+
 
 // write a single byte to an I2C device
 uint8_t writeI2CReg8Blocking(uint8_t addr, uint8_t subaddr, uint8_t data)
@@ -9,21 +13,30 @@ uint8_t writeI2CReg8Blocking(uint8_t addr, uint8_t subaddr, uint8_t data)
   return Wire.endTransmission();
 }
 
+
 // read N bytes from an I2C device
-uint8_t readI2CRegNBlocking(uint8_t addr, uint8_t subaddr, uint8_t buflen, uint8_t *buf)
+void readI2CRegNBlocking(uint8_t addr, uint8_t subaddr, uint8_t buflen, uint8_t *buf)
 {
   Wire.beginTransmission(ADDR_ACCEL);
   Wire.write(subaddr); // the current accelerometer requires that the msb be set high to do a multi-byte transfer
   Wire.endTransmission(false);
-  Wire.requestFrom(ADDR_ACCEL, (uint8_t)1);
-  // while(Wire.available()) *(buf++) = Wire.readBytes();
-  while (Wire.available())
-  {
-    /* code */
-    return Wire.read();
+  Wire.requestFrom(ADDR_ACCEL, (uint8_t)buflen);
+  if (Wire.available() == 6) {
+    uint8_t xL = Wire.read();
+    uint8_t xH = Wire.read();
+    uint8_t yL = Wire.read();
+    uint8_t yH = Wire.read();
+    uint8_t zL = Wire.read();
+    uint8_t zH = Wire.read();
+    
+    xAccel = (int16_t)((xH << 8) | xL); // represents acceleration tangential to the ring, not useful to us
+    yAccel = (int16_t)((yH << 8) | yL); // represents acceleration axial to the ring, which shows which way the bot is flipped
+    
+    zAccel = (int16_t)((zH << 8) | zL);
+    Serial.println("xAccel: "+ xAccel);
+    Serial.println("yAccel: "+ yAccel);
+    Serial.println("zAccel: "+ zAccel);
   }
-
-  return 0;
 }
 
 void configAccelerometer()
@@ -33,6 +46,7 @@ void configAccelerometer()
   accelAngle = 0;
   accelTrim = 0;
   measurementPeriod = 10000; // in microseconds. Represents 100Hz
+  flip = 0;
 }
 
 void runAccelerometer()
@@ -50,28 +64,10 @@ void runAccelerometer()
 
     uint8_t accelBuf[6];
 
-    Wire.beginTransmission(ADDR_ACCEL);
-    Wire.write(OUT_X_L | 0x80); // the current accelerometer requires that the msb be set high to do a multi-byte transfer
-    Wire.endTransmission(false);
-
-    Wire.requestFrom(ADDR_ACCEL, (uint8_t)6); // request 6 bytes from the accelerometer
-
     // this uses blocking I2C, which makes it relatively slow. But given that we run our I2C ar 1.8MHz we will likely be okay
-    readI2CRegNBlocking(ADDR_ACCEL, OUT_X_L, 6, accelBuf);
+    readI2CRegNBlocking(ADDR_ACCEL, (OUT_X_L | 0x80), 6, accelBuf);
 
-    if (Wire.available() == 6) {
-      uint8_t xL = Wire.read();
-      uint8_t xH = Wire.read();
-      uint8_t yL = Wire.read();
-      uint8_t yH = Wire.read();
-      uint8_t zL = Wire.read();
-      uint8_t zH = Wire.read();
-      
-      int16_t xAccel = (int16_t)((xH << 8) | xL); // represents acceleration tangential to the ring, not useful to us
-      int16_t yAccel = (int16_t)((yH << 8) | yL); // represents acceleration axial to the ring, which shows which way the bot is flipped
-      
-      zAccel = (int16_t)((zH << 8) | zL);
-    }
+    
     
     
 

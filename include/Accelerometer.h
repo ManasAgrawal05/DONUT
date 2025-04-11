@@ -38,7 +38,7 @@
 
 
 uint8_t writeI2CReg8Blocking(uint8_t addr, uint8_t subaddr, uint8_t data);
-uint8_t readI2CRegNBlocking(uint8_t addr, uint8_t subaddr, uint8_t buflen, uint8_t *buf);
+void readI2CRegNBlocking(uint8_t addr, uint8_t subaddr, uint8_t buflen, uint8_t *buf);
 void configAccelerometer();
 
 //we read from the accelerometer much slower than the accelerometer's data rate to make sure we always get new data
@@ -64,6 +64,10 @@ static uint16_t angleAtLastMeasurement;
 
 //we make this global so that comms can send it out for calibration purposes
 static int16_t zAccel;
+
+//TODO: implement flip. For now I think the controls will just be inverted?
+static byte flip;
+
 
 void runAccelerometer();
 
