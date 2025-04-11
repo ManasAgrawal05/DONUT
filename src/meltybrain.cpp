@@ -1,3 +1,4 @@
+#include <esp32-hal.h>
 #define motor1 3
 #define motor2 4
 
